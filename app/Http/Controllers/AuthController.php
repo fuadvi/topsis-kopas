@@ -27,7 +27,9 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-       $user = User::create($request->validated());
+        $data = $request->validated();
+        $data['password'] = Hash::make($request->password);
+       $user = User::create($data);
 
        return $this->success('success register', [
            'name' => $user->nama
