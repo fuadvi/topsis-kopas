@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Traits\RespondFormatter;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,22 +20,25 @@ class AuthController extends Controller
             return $this->error('The provided credentials are incorrect.',422);
         }
 
-        return $this->success('login successfuly',$user->createToken('token')->plainTextToken);
+        return $this->success('login successfuly',(object)[
+            "token" => $user->createToken('token')->plainTextToken
+        ]);
     }
 
-    public function show(string $id)
+    public function register(RegisterRequest $request)
     {
-        //
+       $user = User::create($request->validated());
+
+       return $this->success('success register', [
+           'name' => $user->nama
+       ]);
     }
 
-    public function register(Request $request)
-    {
-        //
-    }
 
-
-    public function logout(string $id)
+    public function logout(User $user)
     {
-        //
+        $user->tokens()->delete();
+
+        $this->success('success logout',null);
     }
 }
