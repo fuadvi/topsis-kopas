@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\RespondFormatter;
-use App\Models\Jurusan;
+use App\Models\JurusanSmk;
 use Illuminate\Http\Request;
 
-class JurusanController extends Controller
+class JurusanSmkController extends Controller
 {
     use RespondFormatter;
     /**
@@ -14,6 +14,6 @@ class JurusanController extends Controller
      */
     public function __invoke(Request $request)
     {
-        return $this->success('list jurusan',Jurusan::all('id','nama'));
+        return $this->success('list jurusan smk',JurusanSmk::all('id','nama'));
     }
 }

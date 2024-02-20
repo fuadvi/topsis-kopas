@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\JurusanController;
+use App\Http\Controllers\JurusanSmkController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\QuestionTitleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,4 +30,11 @@ Route::controller(AuthController::class)
         Route::post('logout/{user}','logout')->middleware('auth:sanctum');
     });
 
-Route::get('jurusan', JurusanController::class);
+Route::get('jurusan-smk', JurusanSmkController::class);
+
+Route::middleware('auth:sanctum')
+    ->group(function (){
+        Route::get('category', QuestionTitleController::class);
+
+        Route::apiResource('questions', QuestionController::class);
+    });

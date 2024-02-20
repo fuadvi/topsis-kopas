@@ -27,7 +27,7 @@ class RegisterRequest extends FormRequest
             'email' => ['required','email'],
             'password' => ['required','string', 'confirmed', Password::min(8)],
             'asal_sekolah' => ['required','string'],
-            'jurusan_id' => ['required','integer','exists:jurusan,id']
+            'jurusan_smk_id' => ['required','integer','exists:jurusan_smk,id']
         ];
     }
 }

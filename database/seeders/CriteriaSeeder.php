@@ -2,44 +2,48 @@
 
 namespace Database\Seeders;
 
-use App\Models\Jurusan;
+use App\Models\Criteria;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class JurusanSeeder extends Seeder
+class CriteriaSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $jurusan = [
+        $criteria = [
             [
                 'id' => 1,
-                'nama' => 'ipa'
+                'name' => 'Penalaran Visual'
             ],
             [
                 'id' => 2,
-                'nama' => 'ips'
+                'name' => 'Penalaran Numerik'
             ],
             [
                 'id' => 3,
-                'nama' => 'akt'
+                'name' => 'Penalaran Urutan'
             ],
             [
                 'id' => 4,
-                'nama' => 'rpl'
+                'name' => 'Pengenalan Spasial'
             ],
             [
                 'id' => 5,
-                'nama' => 'tkj'
+                'name' => 'Figural Angka'
             ],
             [
                 'id' => 6,
-                'nama' => 'tsm'
+                'name' => 'Sistematisasi'
+            ],
+            [
+                'id' => 7,
+                'name' => 'Tiga Dimensi'
             ],
         ];
 
-        Jurusan::insert($jurusan);
+        Criteria::insert($criteria);
     }
 }

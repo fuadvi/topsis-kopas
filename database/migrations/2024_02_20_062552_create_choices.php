@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jurusan_smk', function (Blueprint $table) {
+        Schema::create('choices', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
+            $table->string('name');
+            $table->integer('point');
+            $table->boolean('type')->default(0); // 0 -> text, 1 -> image
+            $table->foreignId('question_id')->constrained('questions');
             $table->timestamps();
         });
     }
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jurusan_smk');
+        Schema::dropIfExists('choices');
     }
 };

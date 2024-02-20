@@ -1,0 +1,114 @@
+@startuml
+
+entity roles{
+    id
+    --
+    nama
+    created_at
+    updated_at
+}
+
+entity jurusan_smk{
+    id
+    --
+    nama
+    created_at
+    updated_at
+}
+
+
+entity users {
+    id
+    --
+    nama
+    email
+    password
+    asal_sekolah
+    jurusan_id: fk
+    role_id: fk
+    created_at
+    updated_at
+}
+
+entity question_titles {
+    id
+    --
+    name
+    created_at
+    updated_at
+}
+
+entity questions {
+    id
+    --
+    name
+    type: text or image
+    question_title_id: fk
+    created_at
+    updated_at
+}
+
+entity choices {
+    id
+    --
+    name: nullable
+    url_image: nullable
+    question_id: fk
+    bobot: int
+    type: text or image
+    created_at
+    updated_at
+}
+
+entity answers {
+    id
+    --
+    question_id: fk
+    choice_id: fk
+    user_id: fk
+    criteria_id
+    bobot: int
+}
+
+entity jurusan_pnl
+{
+    id
+    --
+    nama
+    created_at
+    updated_at
+}
+
+entity criteria
+{
+    id
+    --
+    nama
+    created_at
+    updated_at
+}
+
+entity criteria_jurusan_pnl
+{
+    id
+    --
+    criteria_id
+    jurusan_pnl_id
+    created_at
+    updated_at
+}
+
+
+users }|--||roles
+users }|--||jurusan_smk
+question_titles ||--o{ questions
+questions }o--o{ choices
+choices ||--||answers
+answers ||--|{ users
+answers ||--|| questions
+criteria_jurusan_pnl }o--|| criteria
+criteria_jurusan_pnl }o--|| jurusan_pnl
+
+
+
+@enduml

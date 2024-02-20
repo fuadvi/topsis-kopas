@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\Jurusan;
+use App\Models\JurusanSmk;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -22,7 +22,11 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
-            Jurusan::class
+            JurusanSmkSeeder::class,
+            JurusanPnlSeeder::class,
+            CriteriaSeeder::class,
+            CriteriaJurusanSeeder::class,
+            QuestionTitleSeeder::class
         ]);
     }
 }
