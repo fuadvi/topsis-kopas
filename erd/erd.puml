@@ -44,6 +44,7 @@ entity questions {
     name
     type: text or image
     question_title_id: fk
+    criteria_id: fk
     created_at
     updated_at
 }
@@ -52,7 +53,6 @@ entity choices {
     id
     --
     name: nullable
-    url_image: nullable
     question_id: fk
     bobot: int
     type: text or image
@@ -64,10 +64,10 @@ entity answers {
     id
     --
     question_id: fk
-    choice_id: fk
     user_id: fk
     criteria_id
     bobot: int
+    type: string
 }
 
 entity jurusan_pnl

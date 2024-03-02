@@ -6,7 +6,6 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Traits\RespondFormatter;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -21,7 +20,8 @@ class AuthController extends Controller
         }
 
         return $this->success('login successfuly',(object)[
-            "token" => $user->createToken('token')->plainTextToken
+            "token" => $user->createToken('token')->plainTextToken,
+            "role" => $user->role->nama
         ]);
     }
 

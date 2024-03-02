@@ -16,4 +16,9 @@ class JurusanPNL extends Model
     ];
 
     protected $guarded = ['id'];
+
+    public function criteria()
+    {
+        return $this->hasMany(CriteriaJurusan::class,'jurusan_pnl_id', 'id');
+    }
 }

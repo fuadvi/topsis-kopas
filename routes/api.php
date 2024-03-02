@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\JurusanSmkController;
 use App\Http\Controllers\QuestionController;
@@ -38,3 +39,5 @@ Route::middleware('auth:sanctum')
 
         Route::apiResource('questions', QuestionController::class);
     });
+
+Route::post('answer', AnswerController::class);
