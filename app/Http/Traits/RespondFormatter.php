@@ -4,7 +4,7 @@ namespace App\Http\Traits;
 
 trait RespondFormatter
 {
-    public function coreReponse(string $message, $data = null, int $statusCode, bool $isSuccess = true)
+    public function coreReponse(string $message, int $statusCode, $data = null, bool $isSuccess = true)
     {
         if (!$message) return response()->json(['message'=> 'Pesan Wajib Di isi'], 500);
 
@@ -31,13 +31,13 @@ trait RespondFormatter
         }
     }
 
-    public function success(string $message, $data, int $statusCode = 200)
+    public function success(string $message, $data, int $statusCode = 200): \Illuminate\Http\JsonResponse
     {
-        return $this->coreReponse($message,$data,$statusCode);
+        return $this->coreReponse($message,$statusCode,$data);
     }
 
     public function error(string $message, int $statusCode= 500, mixed $data = null)
     {
-        return $this->coreReponse($message,$data,$statusCode,false);
+        return $this->coreReponse($message,$statusCode,$data,false);
     }
 }
