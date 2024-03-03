@@ -47,4 +47,5 @@ Route::middleware('auth:sanctum')
     ->group(function (){
         Route::get('overall-answer-results', 'index');
         Route::get('answer-results', 'detail');
+        Route::get('charts', 'pieChart');
     });

@@ -5,11 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DetailAnswerRequest;
 use App\Http\Traits\RespondFormatter;
 use App\Models\Answer;
+use App\Models\JurusanPNL;
 use Illuminate\Http\Request;
 
 class ResultAnswerController extends Controller
 {
     use RespondFormatter;
+
+    public function __construct()
+    {
+//        $this->middleware('admin')->except(['detail','index']);
+    }
+
 
     public function detail(DetailAnswerRequest $request)
     {
@@ -34,5 +41,16 @@ class ResultAnswerController extends Controller
             'minat' => $minat,
             'bakat' => $bakat,
         ]);
+    }
+
+    public function pieChart()
+    {
+        $jurusan = JurusanPNL::withCount('result')
+            ->get();
+
+        return $this->success("list chart jurusan", [
+            'jurusan' => $jurusan
+        ]);
+
     }
 }
