@@ -63,10 +63,10 @@ entity choices {
 entity answers {
     id
     --
-    question_id: fk
+    question_name
     user_id: fk
-    criteria_id
-    bobot: int
+    jurusan
+    score: int
     type: string
 }
 
@@ -98,8 +98,22 @@ entity criteria_jurusan_pnl
     updated_at
 }
 
+entity result
+{
+    id
+    --
+    user_id: fk
+    jurusan_pnl_id: fk
+    jurusan
+    metode
+    created_at
+    updated_at
+}
+
 
 users }|--||roles
+users }|--||result
+result ||--|| jurusan_pnl
 users }|--||jurusan_smk
 question_titles ||--o{ questions
 questions }o--o{ choices

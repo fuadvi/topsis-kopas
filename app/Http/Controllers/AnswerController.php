@@ -7,6 +7,7 @@ use App\Http\Traits\RespondFormatter;
 use App\Models\Answer;
 use App\Models\JurusanPNL;
 use App\Models\Question;
+use App\Models\Result;
 
 class AnswerController extends Controller
 {
@@ -138,6 +139,7 @@ class AnswerController extends Controller
         foreach ($alternatives as $index => $alternative) {
             $data = [
                 "jurusan" => $alternative->name,
+                "jurusan_pnl_id" => $alternative->id,
                 "score" => $scores[$index],
                 "type" => $metode,
                 "user_id" => $userId,
@@ -146,6 +148,15 @@ class AnswerController extends Controller
             Answer::create($data);
             $result[]= $data;
         }
+
+        Result::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'metode' => $metode
+            ],
+            $result[0]
+        );
+
 
         return $result;
     }
@@ -217,6 +228,7 @@ class AnswerController extends Controller
         foreach ($alternatives as $index => $alternative) {
             $data = [
                 "jurusan" => $alternative->name,
+                "jurusan_pnl_id" => $alternative->id,
                 "score" => $scores[$index],
                 "type" => $metode,
                 "user_id" => $userId,
@@ -225,6 +237,14 @@ class AnswerController extends Controller
             Answer::create($data);
             $result[] = $data;
         }
+
+        Result::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'metode' => $metode
+            ],
+            $result[0]
+        );
 
         return $result;
     }
@@ -306,6 +326,7 @@ class AnswerController extends Controller
         foreach ($alternatives as $index => $alternative) {
             $data = [
                 "jurusan" => $alternative->name,
+                "jurusan_pnl_id" => $alternative->id,
                 "score" => $scores[$index],
                 "type" => $metode,
                 "user_id" => $userId,
@@ -315,6 +336,14 @@ class AnswerController extends Controller
             Answer::create($data);
             $result[] = $data;
         }
+
+        Result::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'metode' => $metode
+            ],
+            $result[0]
+        );
 
         return $result;
     }
