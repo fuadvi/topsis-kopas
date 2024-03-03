@@ -14,7 +14,7 @@ class ResultAnswerController extends Controller
 
     public function __construct()
     {
-//        $this->middleware('admin')->except(['detail','index']);
+        $this->middleware('admin')->except(['detail','index']);
     }
 
 
