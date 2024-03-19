@@ -26,9 +26,10 @@ class QuestionRequest extends FormRequest
         return [
             'name' => ['required','string'],
             'question_title_id' => ['required','integer','exists:question_titles,id'],
-            'criteria_id' => ['required','integer','exists:criterias,id'],
+            'criteria_id' => ['nullable','integer','exists:criterias,id'],
+            'subject_id' => ['nullable','integer','exists:subjects,id'],
             'type' => ['required','boolean'],
-            'choices' => ['required','array'],
+            'choices' => ['nullable','array'],
             'choices.*.name' => ['required','string'],
             'choices.*.point' => ['required','integer'],
             'choices.*.type' => ['required','boolean'],

@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('questions', function (Blueprint $table) {
-            $table->foreignId('criteria_id')->nullable()->constrained('criterias');
+        Schema::create('bobot_subjects', function (Blueprint $table) {
+            $table->id();
+            $table->integer('bobot');
+            $table->foreignId('jurusan_pnl_id')->constrained('jurusan_pnl');
+            $table->foreignId('subject_id')->constrained('subjects');
+            $table->timestamps();
         });
     }
 
@@ -21,9 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('questions', function (Blueprint $table) {
-            $table->foreignId('criteria_id');
-            $table->dropColumn('criteria_id');
-        });
+        Schema::dropIfExists('bobot_subjects');
     }
 };

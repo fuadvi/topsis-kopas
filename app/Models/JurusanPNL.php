@@ -21,6 +21,11 @@ class JurusanPNL extends Model
     {
         return $this->hasMany(CriteriaJurusan::class,'jurusan_pnl_id', 'id');
     }
+
+    public function subject()
+    {
+        return $this->hasMany(BobotSubject::class,'jurusan_pnl_id', 'id');
+    }
     public function result()
     {
         return $this->hasMany(Result::class,'jurusan_pnl_id', 'id');

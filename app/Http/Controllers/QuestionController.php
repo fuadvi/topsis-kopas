@@ -27,7 +27,7 @@ class QuestionController extends Controller
             $data =$request->validated();
             $question = Question::create($data);
 
-            $question->choices()->createMany($data['choices']);
+            $question->choices()->createMany($data['choices'] ?? []);
             DB::commit();
         } catch (\Exception $err)
         {
@@ -51,7 +51,7 @@ class QuestionController extends Controller
 
             // update data terbaru
             $question->update($data);
-            $question->choices()->createMany($data['choices']);
+            $question->choices()->createMany($data['choices']?? []);
             DB::commit();
         } catch (\Exception $err)
         {

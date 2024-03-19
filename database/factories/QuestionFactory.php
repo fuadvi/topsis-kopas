@@ -21,7 +21,7 @@ class QuestionFactory extends Factory
         return [
             'name' => $type == 0 ? $this->faker->text(20) : $this->faker->imageUrl,
             'type' =>$type,
-            'question_title_id' => QuestionTitle::all()->random()->id
+            'question_title_id' => QuestionTitle::whereNot('id',3)->get()->random()->id
         ];
     }
 }

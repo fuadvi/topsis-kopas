@@ -15,27 +15,33 @@ class AnswerController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(AnswerRequest $request)
+    public function __invoke(AnswerRequest $request): \Illuminate\Http\JsonResponse
     {
         $data = $request->validated();
         $listCeteria = [];
-         array_map(function ($soal) use (&$listCeteria){
-             $column = array_column($listCeteria, 'criteria_id');
-             $cek = in_array($soal['criteria_id'], $column, true);
 
-             if (!$cek) {
-                 $listCeteria[] = [
-                     'question_id' => $soal['question_id'],
-                     'user_id' => $soal['user_id'],
-                     'criteria_id' => $soal['criteria_id'],
-                     'point' => $soal['bobot'],
-                 ];
-             } else {
-                 $posisi = array_search($soal['criteria_id'], $column, true);
-                 $listCeteria[$posisi]['point'] += $soal['bobot'];
-             }
-        }, $data['data']);
+        if (!$request->isRaport)
+        {
+            array_map(static function ($soal) use (&$listCeteria){
+                $column = array_column($listCeteria, 'criteria_id');
+                $cek = in_array($soal['criteria_id'], $column, true);
 
+                if (!$cek) {
+                    $listCeteria[] = [
+                        'question_id' => $soal['question_id'],
+                        'user_id' => $soal['user_id'],
+                        'criteria_id' => $soal['criteria_id'],
+                        'point' => $soal['point'],
+                    ];
+                } else {
+                    $posisi = array_search($soal['criteria_id'], $column, true);
+                    $listCeteria[$posisi]['point'] += $soal['point'];
+                }
+            }, $data['data']);
+        } else
+        {
+            $listCeteria =  $data['data'];
+        }
 
          $result = match ($request->metode)
          {
@@ -46,7 +52,7 @@ class AnswerController extends Controller
         return $this->success('successfully answered the question',collect($result)->sortBy('score',descending: true));
     }
 
-    public function metodeTopsis($listCeteria,$metode)
+    public function metodeTopsis($listCeteria,$metode): array
     {
         $points = collect($listCeteria)->pluck('point');
         $userId = collect($listCeteria)->value('user_id');
@@ -69,26 +75,40 @@ class AnswerController extends Controller
         foreach ($alternatives as $alternative) {
             $row = [];
             foreach ($listCeteria as $ceteria) {
-                $row["point"][] = $ceteria['point'];
-                $row["criteria_id"] = $ceteria['criteria_id'];
+                $row["point"][] = (object)[
+                    "nilai" =>  $ceteria['point'],
+                    "criteria_id" =>  $ceteria['criteria_id'] ?? 0,
+                    "subject_id" =>  $ceteria['subject_id'] ?? 0
+                ];
                 $row["jurusan_id"] = $alternative->id;
             }
-            $decisionMatrix[$alternative->name] = $row;
+            $decisionMatrix[] = $row;
         }
+
+        // Menghitung total dari setiap indeks
+        $totals = array_reduce($decisionMatrix, static function ($carry, $item) {
+            foreach ($item['point'] as $index => $value) {
+                $carry[$index] += $value->nilai;
+            }
+            return $carry;
+        }, array_fill(0, count($decisionMatrix[0]['point']), 0));
 
         // Normalisasi matriks keputusan
         $normalizedMatrix = [];
         foreach ($decisionMatrix as $row) {
-            $sumOfSquares = array_sum(array_map(function ($x) {
-                return $x * $x;
-            }, $row['point']));
-            $sqrtSumOfSquares = sqrt($sumOfSquares);
-            $normalizedRow = array_map(function ($x) use ($sqrtSumOfSquares) {
-                return $x / $sqrtSumOfSquares;
+            $index = 0;
+            $normalizedRow = array_map(static function ($x) use ($totals,&$index) {
+                return (object)[
+                    "nilai" => $x->nilai / $totals[$index],
+                    "criteria_id" => $x->criteria_id,
+                    "subject_id" => $x->subject_id
+                ];
             }, $row['point']);
+
             $data = [
                 "nilai" => $normalizedRow,
-                "criteria_id" => $row['criteria_id'],
+//                "criteria_id" => $row['criteria_id'] ?? 0,
+//                "subject_id" => $row['subject_id'] ?? 0,
                 "jurusan_id" => $row['jurusan_id'],
             ];
             $normalizedMatrix[] = $data;
@@ -99,13 +119,18 @@ class AnswerController extends Controller
         $weightedMatrix = [];
         foreach ($normalizedMatrix as $row) {
             $weightedRow = [];
+
             foreach ($row['nilai'] as $key => $value) {
-                $weightedRow[] = $value * $this->ambilBobotNilai($row['jurusan_id'],$key+1,$points[$key]);
+                $weightedRow[] = $value->nilai * $this->ambilBobotNilai(
+                    $row['jurusan_id'],
+                    $value->criteria_id,
+                    $points[$key],
+                    $value->subject_id,
+                    );
             }
 
             $weightedMatrix[] = $weightedRow;
         }
-
 
         // Hitung solusi ideal positif (PIS) dan solusi ideal negatif (NIS)
         $numCriteria = count($listCeteria);
@@ -129,6 +154,7 @@ class AnswerController extends Controller
             $positiveDistances[] = sqrt($positiveDistance);
             $negativeDistances[] = sqrt($negativeDistance);
         }
+
         // Hitung skor TOPSIS
         $scores = [];
         foreach ($positiveDistances as $key => $positiveDistance) {
@@ -162,7 +188,7 @@ class AnswerController extends Controller
     }
 
 
-    public function metodeCOPRAS($listCriteria,$metode)
+    public function metodeCOPRAS($listCriteria,$metode): array
     {
         $points = collect($listCriteria)->pluck('point');
         $userId = collect($listCriteria)->value('user_id');
@@ -199,11 +225,11 @@ class AnswerController extends Controller
         // Normalisasi matriks keputusan
         $normalizedMatrix = [];
         foreach ($decisionMatrix as  $rows) {
-            $sumOfSquares = array_sum(array_map(function ($x) {
+            $sumOfSquares = array_sum(array_map(static function ($x) {
                 return $x * $x;
             }, $row['point']));
             $sqrtSumOfSquares = sqrt($sumOfSquares);
-            $normalizedRow = array_map(function ($x) use ($sqrtSumOfSquares) {
+            $normalizedRow = array_map(static function ($x) use ($sqrtSumOfSquares) {
                 return $x / $sqrtSumOfSquares;
             }, $row['point']);
             $data = [
@@ -249,7 +275,7 @@ class AnswerController extends Controller
         return $result;
     }
 
-    public function metodeCOPRASDua($listCriteria, $metode)
+    public function metodeCOPRASDua($listCriteria, $metode): array
     {
         $points = collect($listCriteria)->pluck('point');
         $userId = collect($listCriteria)->value('user_id');
@@ -265,10 +291,6 @@ class AnswerController extends Controller
             ->whereQuestionName($questionName)
             ?->delete();
 
-        Answer::whereUserId($userId)
-            ->whereType($metode)
-            ?->delete();
-
         $alternatives  = JurusanPNL::with('criteria')->get();
 
 
@@ -279,7 +301,8 @@ class AnswerController extends Controller
             foreach ($listCriteria as $criteria) {
                 $row["bobot"][] = (object)[
                   "nilai" =>  $criteria['point'],
-                  "criteria_id" =>  $criteria['criteria_id']
+                  "criteria_id" =>  $criteria['criteria_id'],
+                  "subject_id" =>  $criteria['subject_id'] ?? 0
                 ];
                 $row["jurusan_id"] = $alternative->id;
             }
@@ -287,7 +310,7 @@ class AnswerController extends Controller
         }
 
         // Menghitung total dari setiap indeks
-        $totals = array_reduce($decisionMatrix, function ($carry, $item) {
+        $totals = array_reduce($decisionMatrix, static function ($carry, $item) {
             foreach ($item['bobot'] as $index => $value) {
                 $carry[$index] += $value->nilai;
             }
@@ -298,10 +321,11 @@ class AnswerController extends Controller
         $normalizedMatrix = [];
         foreach ($decisionMatrix as $rows) {
            $index = 0;
-            $normalizedRow = array_map(function ($x) use ($totals,&$index) {
+            $normalizedRow = array_map(static function ($x) use ($totals,&$index) {
                 return (object)[
                     "nilai" => $x->nilai / $totals[$index],
-                    "criteria_id" => $x->criteria_id
+                    "criteria_id" => $x->criteria_id,
+                    "subject_id" => $x->subject_id
                 ];
             }, $rows['bobot']);
 
@@ -317,7 +341,13 @@ class AnswerController extends Controller
         foreach ($normalizedMatrix as $row) {
             $score = 0;
             foreach ($row['data'] as $key => $value) {
-                $score += $value->nilai * $this->ambilBobotNilai($row['jurusan_id'], $value->criteria_id, $points[$key]);
+                $score += $value->nilai * $this->ambilBobotNilai(
+                    $row['jurusan_id'],
+                    $value->criteria_id,
+                    $points[$key],
+                        $value->subject_id,
+                    )
+                ;
             }
             $scores[] = $score;
         }
@@ -349,11 +379,33 @@ class AnswerController extends Controller
     }
 
 
-    public function ambilBobotNilai($jurusanId, $criteriaId, $point)
+    public function ambilBobotNilai($jurusanId, $criteriaId, $point, $subjectId): int
     {
-       $jurusan =  JurusanPNL::with('criteria')->findOrFail($jurusanId);
+       $jurusan =  JurusanPNL::with(['criteria','subject'])->findOrFail($jurusanId);
 
-        if ($jurusan->criteria->where('criteria_id',$criteriaId)->isEmpty()) return 0;
+        if ($subjectId > 0)
+        {
+            return $this->bobotSubject($jurusan, $subjectId);
+        }
+
+        return $this->bobotCreteria($jurusan, $criteriaId, $point);
+    }
+
+    public function bobotSubject($jurusan, $subjectId): int
+    {
+        $bobotSubject = $jurusan->subject->where('subject_id',$subjectId)?->value('bobot');
+        if (!$bobotSubject) {
+            return 0;
+        }
+
+        return $bobotSubject;
+    }
+
+    public function bobotCreteria($jurusan, $criteriaId, $point): int
+    {
+        if ($jurusan->criteria->where('criteria_id',$criteriaId)->isEmpty()) {
+            return 0;
+        }
 
         return match ($criteriaId)
         {
@@ -367,7 +419,7 @@ class AnswerController extends Controller
         };
     }
 
-    public function bobotPenalaranVisual($point)
+    public function bobotPenalaranVisual($point): int
     {
        return match (true)
        {
@@ -379,7 +431,7 @@ class AnswerController extends Controller
        };
     }
 
-    public function bobotPenalaranNumerik($point)
+    public function bobotPenalaranNumerik($point): int
     {
         return match (true)
         {
@@ -391,7 +443,7 @@ class AnswerController extends Controller
         };
     }
 
-    public function bobotPenalaranUrutan($point)
+    public function bobotPenalaranUrutan($point): int
     {
         return match (true)
         {
@@ -402,7 +454,7 @@ class AnswerController extends Controller
             default => 1
         };
     }
-    public function bobotPengenalanSpasial($point)
+    public function bobotPengenalanSpasial($point): int
     {
         return match (true)
         {
@@ -415,7 +467,7 @@ class AnswerController extends Controller
     }
 
 
-    public function bobotFiguralAngka($point)
+    public function bobotFiguralAngka($point): int
     {
         return match (true)
         {
@@ -427,7 +479,7 @@ class AnswerController extends Controller
         };
     }
 
-    public function bobotSistematisasi($point)
+    public function bobotSistematisasi($point): int
     {
         return match (true)
         {
@@ -439,7 +491,7 @@ class AnswerController extends Controller
         };
     }
 
-    public function bobotTigaDimensi($point)
+    public function bobotTigaDimensi($point): int
     {
         return match (true)
         {

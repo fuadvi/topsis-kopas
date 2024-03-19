@@ -6,6 +6,7 @@ use App\Http\Controllers\JurusanSmkController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuestionTitleController;
 use App\Http\Controllers\ResultAnswerController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,3 +50,5 @@ Route::middleware('auth:sanctum')
         Route::get('answer-results', 'detail');
         Route::get('charts', 'pieChart');
     });
+
+Route::apiResource('users', UserController::class);

@@ -14,6 +14,8 @@ class QuestionTitle extends Model
         'updated_at'
     ];
 
+    protected $guarded = ['id'];
+
     public function question()
     {
        return $this->hasMany(Question::class);

@@ -21,6 +21,10 @@ class QuestionTitleSeeder extends Seeder
             [
                 'id' => 2,
                 'name' => 'Tes Bakat'
+            ],
+            [
+                'id' => 3,
+                'name' => 'Nilai Raport'
             ]
         ];
 

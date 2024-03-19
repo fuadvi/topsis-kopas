@@ -111,6 +111,25 @@ entity result
 }
 
 
+entity subjects
+{
+    id
+    --
+    name
+}
+
+entity bobot_subjects
+{
+    id
+    --
+    jurusan_pnl_id: fk
+    subject_id: fk
+    bobot: int
+}
+
+
+
+
 users }|--||roles
 users }|--||result
 result ||--|| jurusan_pnl
@@ -122,6 +141,8 @@ answers ||--|{ users
 answers ||--|| questions
 criteria_jurusan_pnl }o--|| criteria
 criteria_jurusan_pnl }o--|| jurusan_pnl
+jurusan_pnl }o--|| bobot_subjects
+subjects ||--o{ bobot_subjects
 
 
 

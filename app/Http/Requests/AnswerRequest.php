@@ -25,8 +25,9 @@ class AnswerRequest extends FormRequest
             'data' => ['required','array'],
             'data.*.question_id' => ['required','integer','exists:questions,id'],
             'data.*.user_id' => ['required','integer','exists:users,id'],
-            'data.*.criteria_id' => ['required','integer','exists:criterias,id'],
-            'data.*.bobot' => ['required','integer'],
+            'data.*.criteria_id' => ['nullable','integer','exists:criterias,id'],
+            'data.*.subject_id' => ['nullable','integer','exists:subjects,id'],
+            'data.*.point' => ['required','integer'],
             'metode' => ['required','string','in:topsis,copras']
         ];
     }
