@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AnswerRequest;
 use App\Http\Traits\RespondFormatter;
 use App\Models\Answer;
+use App\Models\BobotCriteria;
 use App\Models\JurusanPNL;
 use App\Models\Question;
 use App\Models\Result;
@@ -46,7 +47,7 @@ class AnswerController extends Controller
          $result = match ($request->metode)
          {
              "topsis" => $this->metodeTopsis($listCeteria,$request->metode),
-             "copras" => $this->metodeCOPRASDua($listCeteria,$request->metode)
+             "copras" => $this->metodeCOPRAS($listCeteria,$request->metode)
          };
 
         return $this->success('successfully answered the question',collect($result)->sortBy('score',descending: true));
@@ -86,9 +87,9 @@ class AnswerController extends Controller
         }
 
         // Menghitung total dari setiap indeks
-        $totals = array_reduce($decisionMatrix, static function ($carry, $item) {
+        $pembagi = array_reduce($decisionMatrix, static function ($carry, $item) {
             foreach ($item['point'] as $index => $value) {
-                $carry[$index] += $value->nilai;
+                $carry[$index] += $value->nilai ** 2;
             }
             return $carry;
         }, array_fill(0, count($decisionMatrix[0]['point']), 0));
@@ -97,12 +98,14 @@ class AnswerController extends Controller
         $normalizedMatrix = [];
         foreach ($decisionMatrix as $row) {
             $index = 0;
-            $normalizedRow = array_map(static function ($x) use ($totals,&$index) {
-                return (object)[
-                    "nilai" => $x->nilai / $totals[$index],
+            $normalizedRow = array_map(static function ($x) use ($pembagi,&$index) {
+                $data = (object)[
+                    "nilai" => $x->nilai / sqrt($pembagi[$index]),
                     "criteria_id" => $x->criteria_id,
                     "subject_id" => $x->subject_id
                 ];
+                $index++;
+                return $data;
             }, $row['point']);
 
             $data = [
@@ -187,95 +190,7 @@ class AnswerController extends Controller
         return $result;
     }
 
-
-    public function metodeCOPRAS($listCriteria,$metode): array
-    {
-        $points = collect($listCriteria)->pluck('point');
-        $userId = collect($listCriteria)->value('user_id');
-        $questionId = collect($listCriteria)->value('question_id');
-
-        $questionName = Question::with('title')
-            ->findOrFail($questionId)
-            ?->title
-            ?->name;
-
-        Answer::whereUserId($userId)
-            ->whereType($metode)
-            ->whereQuestionName($questionName)
-            ?->delete();
-
-        Answer::whereUserId($userId)
-            ->whereType($metode)
-            ?->delete();
-
-        $alternatives  = JurusanPNL::with('criteria')->get();
-
-            // Hitung matriks keputusan
-        $decisionMatrix = [];
-        foreach ($alternatives as $alternative) {
-            $row = [];
-            foreach ($listCriteria as $criteria) {
-                $row["point"][] = $criteria['point'];
-                $row["criteria_id"] = $criteria['criteria_id'];
-                $row["jurusan_id"] = $alternative->id;
-            }
-            $decisionMatrix[$alternative->name] = $row;
-        }
-
-        // Normalisasi matriks keputusan
-        $normalizedMatrix = [];
-        foreach ($decisionMatrix as  $rows) {
-            $sumOfSquares = array_sum(array_map(static function ($x) {
-                return $x * $x;
-            }, $row['point']));
-            $sqrtSumOfSquares = sqrt($sumOfSquares);
-            $normalizedRow = array_map(static function ($x) use ($sqrtSumOfSquares) {
-                return $x / $sqrtSumOfSquares;
-            }, $row['point']);
-            $data = [
-                "nilai" => $normalizedRow,
-                "criteria_id" => $row['criteria_id'],
-                "jurusan_id" => $row['jurusan_id'],
-            ];
-            $normalizedMatrix[] = $data;
-        }
-        // Hitung skor COPRAS
-        $scores = [];
-        foreach ($normalizedMatrix as $row) {
-            $score = 0;
-            foreach ($row['nilai'] as $key => $value) {
-                $score += $value * $this->ambilBobotNilai($row['jurusan_id'], $row['criteria_id'], $points[$key]);
-            }
-            $scores[] = $score;
-        }
-
-
-        $result = [];
-        foreach ($alternatives as $index => $alternative) {
-            $data = [
-                "jurusan" => $alternative->name,
-                "jurusan_pnl_id" => $alternative->id,
-                "score" => $scores[$index],
-                "type" => $metode,
-                "user_id" => $userId,
-                "question_name" => $questionName,
-            ];
-            Answer::create($data);
-            $result[] = $data;
-        }
-
-        Result::updateOrCreate(
-            [
-                'user_id' => $userId,
-                'metode' => $metode
-            ],
-            $result[0]
-        );
-
-        return $result;
-    }
-
-    public function metodeCOPRASDua($listCriteria, $metode): array
+    public function metodeCOPRAS($listCriteria, $metode): array
     {
         $points = collect($listCriteria)->pluck('point');
         $userId = collect($listCriteria)->value('user_id');
@@ -388,12 +303,13 @@ class AnswerController extends Controller
             return $this->bobotSubject($jurusan, $subjectId);
         }
 
-        return $this->bobotCreteria($jurusan, $criteriaId, $point);
+        return $this->bobotCriteria($jurusan, $criteriaId, $point);
     }
 
     public function bobotSubject($jurusan, $subjectId): int
     {
         $bobotSubject = $jurusan->subject->where('subject_id',$subjectId)?->value('bobot');
+
         if (!$bobotSubject) {
             return 0;
         }
@@ -401,106 +317,15 @@ class AnswerController extends Controller
         return $bobotSubject;
     }
 
-    public function bobotCreteria($jurusan, $criteriaId, $point): int
+    public function bobotCriteria($jurusan, $criteriaId, $point): int
     {
         if ($jurusan->criteria->where('criteria_id',$criteriaId)->isEmpty()) {
             return 0;
         }
 
-        return match ($criteriaId)
-        {
-            1 => $this->bobotPenalaranVisual($point),
-            2 => $this->bobotPenalaranNumerik($point),
-            3 => $this->bobotPenalaranUrutan($point),
-            4 => $this->bobotPengenalanSpasial($point),
-            5 => $this->bobotFiguralAngka($point),
-            6 => $this->bobotSistematisasi($point),
-            7 => $this->bobotTigaDimensi($point),
-        };
-    }
-
-    public function bobotPenalaranVisual($point): int
-    {
-       return match (true)
-       {
-         $point >= 20 => 5,
-         $point  >=13 and $point <= 19 => 4,
-         $point >=7 and $point <= 12 => 3,
-         $point >=3 and $point <= 6 => 2,
-           default => 1
-       };
-    }
-
-    public function bobotPenalaranNumerik($point): int
-    {
-        return match (true)
-        {
-            $point >= 14 => 5,
-            $point  >=9 and $point <= 13 => 4,
-            $point >=6 and $point <= 18 => 3,
-            $point >=3 and $point <= 5 => 2,
-            default => 1
-        };
-    }
-
-    public function bobotPenalaranUrutan($point): int
-    {
-        return match (true)
-        {
-            $point >= 16 => 5,
-            $point  >=12 and $point <= 15 => 4,
-            $point >=8 and $point <= 11 => 3,
-            $point >=3 and $point <= 7 => 2,
-            default => 1
-        };
-    }
-    public function bobotPengenalanSpasial($point): int
-    {
-        return match (true)
-        {
-            $point >= 43 => 5,
-            $point  >=35 and $point <= 42 => 4,
-            $point >=27 and $point <= 34 => 3,
-            $point >=10 and $point <= 26 => 2,
-            default => 1
-        };
-    }
-
-
-    public function bobotFiguralAngka($point): int
-    {
-        return match (true)
-        {
-            $point >= 22 => 5,
-            $point  >=17 and $point <= 21 => 4,
-            $point >=13 and $point <= 16 => 3,
-            $point >=7 and $point <= 12 => 2,
-            default => 1
-        };
-    }
-
-    public function bobotSistematisasi($point): int
-    {
-        return match (true)
-        {
-            $point >= 121 => 5,
-            $point  >=91 and $point <= 120 => 4,
-            $point >=61 and $point <= 90 => 3,
-            $point >=31 and $point <= 60 => 2,
-            default => 1
-        };
-    }
-
-    public function bobotTigaDimensi($point): int
-    {
-        return match (true)
-        {
-            $point >= 24 => 5,
-            $point  >=18 and $point <= 23 => 4,
-            $point >=12 and $point <= 17 => 3,
-            $point >=6 and $point <= 11 => 2,
-            default => 1
-        };
+        return BobotCriteria::whereCriteriaId($criteriaId)
+            ->where('range','>=',$point)
+            ->value('point');
     }
 
 }

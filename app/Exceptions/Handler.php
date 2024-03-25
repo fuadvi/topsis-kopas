@@ -4,6 +4,8 @@ namespace App\Exceptions;
 
 use App\Http\Traits\RespondFormatter;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 use Illuminate\Auth\AuthenticationException;
 
@@ -29,6 +31,15 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (NotFoundHttpException $err, $request) {
+            $message = basename($err->getMessage());
+            $nameModel = str_contains($message, ']') ? strstr($message, ']', true) : $message;
+            $model = preg_replace('/([a-z])([A-Z])/', '$1 $2', $nameModel);
+
+            return $this->error('Not Found.'." {$model}",401);
+        });
+
     }
 
     protected function unauthenticated($request, AuthenticationException $exception) {
