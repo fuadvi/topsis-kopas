@@ -225,7 +225,7 @@ class AnswerController extends Controller
         }
 
         // Menghitung total dari setiap indeks
-        $totals = array_reduce($decisionMatrix, static function ($carry, $item) {
+        $pembagi = array_reduce($decisionMatrix, static function ($carry, $item) {
             foreach ($item['bobot'] as $index => $value) {
                 $carry[$index] += $value->nilai;
             }
@@ -236,12 +236,15 @@ class AnswerController extends Controller
         $normalizedMatrix = [];
         foreach ($decisionMatrix as $rows) {
            $index = 0;
-            $normalizedRow = array_map(static function ($x) use ($totals,&$index) {
-                return (object)[
-                    "nilai" => $x->nilai / $totals[$index],
+            $normalizedRow = array_map(static function ($x) use ($pembagi,&$index) {
+                $row = (object)[
+                    "nilai" => $x->nilai / sqrt($pembagi[$index]),
                     "criteria_id" => $x->criteria_id,
                     "subject_id" => $x->subject_id
                 ];
+
+                $index++;
+                return $row;
             }, $rows['bobot']);
 
             $data = [
