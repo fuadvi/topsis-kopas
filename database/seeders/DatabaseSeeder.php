@@ -27,7 +27,8 @@ class DatabaseSeeder extends Seeder
             CriteriaSeeder::class,
             CriteriaJurusanSeeder::class,
             QuestionTitleSeeder::class,
-            QuestionSeeder::class
+            QuestionSeeder::class,
+            SubCriteriaSeeder::class
         ]);
     }
 }
