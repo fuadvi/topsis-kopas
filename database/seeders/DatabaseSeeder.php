@@ -28,7 +28,10 @@ class DatabaseSeeder extends Seeder
             CriteriaJurusanSeeder::class,
             QuestionTitleSeeder::class,
             QuestionSeeder::class,
-            SubCriteriaSeeder::class
+            SubCriteriaSeeder::class,
+            SubjectSeeder::class,
+            BobotCreteriaSeeder::class,
+            BobotSubjectSeeder::class
         ]);
     }
 }
