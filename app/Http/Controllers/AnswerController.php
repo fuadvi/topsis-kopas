@@ -264,8 +264,7 @@ class AnswerController extends Controller
                     $value->criteria_id,
                     $points[$key],
                         $value->subject_id,
-                    )
-                ;
+                    );
             }
             $scores[] = $score;
         }
