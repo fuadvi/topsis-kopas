@@ -31,16 +31,16 @@ class SubCriteriaController extends Controller
         return $this->success("subcriteria", $subCriteria);
     }
 
-    public function update(SubCriteriaRequest $request, SubCriteria $subCriteria)
+    public function update(SubCriteriaRequest $request, SubCriteria $subcriterion)
     {
-        $subCriteria->update($request->validated());
+        $subcriterion->update($request->validated());
 
         return $this->success("berhasil melakukan edit subcriteria", null);
     }
 
-    public function destroy(SubCriteria $subCriteria)
+    public function destroy(SubCriteria $subcriterion)
     {
-        $subCriteria->delete();
+        $subcriterion->delete();
 
         return $this->success("subcriteria berhasil di hapus", null);
     }
