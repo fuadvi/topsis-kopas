@@ -26,9 +26,9 @@ class SubCriteriaController extends Controller
         return $this->success("berhasil membuat sub criteria {$subCriteria->name}", null);
     }
 
-    public function show(SubCriteria $subCriteria)
+    public function show(SubCriteria $subcriterion)
     {
-        return $this->success("subcriteria", $subCriteria);
+        return $this->success("subcriteria", $subcriterion);
     }
 
     public function update(SubCriteriaRequest $request, SubCriteria $subcriterion)
