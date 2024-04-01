@@ -3,8 +3,8 @@
 namespace App\Exceptions;
 
 use App\Http\Traits\RespondFormatter;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 use Illuminate\Auth\AuthenticationException;
@@ -38,6 +38,15 @@ class Handler extends ExceptionHandler
             $model = preg_replace('/([a-z])([A-Z])/', '$1 $2', $nameModel);
 
             return $this->error('Not Found.'." {$model}",401);
+        });
+
+        $this->renderable(function (QueryException $err, $request) {
+            if ($request->method() === 'DELETE')
+            {
+                return $this->error("Tidak Bisa Menghapus id ini di karenakan id sudah di gunakan di table lain");
+            }
+
+            return $this->error("Internal Server Error");
         });
 
     }
