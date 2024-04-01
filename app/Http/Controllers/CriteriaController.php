@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BobotCriteriaReqeust;
+use App\Http\Requests\BobotCriteriaRequest;
 use App\Http\Requests\CriteriaRequest;
 use App\Http\Resources\CriteriaResource;
 use App\Http\Traits\RespondFormatter;
@@ -49,9 +49,11 @@ class CriteriaController extends Controller
         return $this->success('berhasil hapus criteria', null);
     }
 
-    public function addBobotCriteria(BobotCriteriaReqeust $request ,Criteria $criterion)
+    public function addBobotCriteria(BobotCriteriaRequest $request , Criteria $criterion)
     {
         $criterion->load('subcriteria');
+
+        $criterion->subcriteria()->delete();
 
         $criterion->subcriteria()->createMany($request->data);
 
