@@ -12,7 +12,8 @@ class SubjectController extends Controller
     use  RespondFormatter;
     public function index()
     {
-        return $this->success('dropdown mata pelajaran',Subject::pluck('name','id'));
+        $subjects = Subject::all();
+        return $this->success('list mata pelajaran',$subjects);
     }
 
     public function store(SubjectsRequest $request)
