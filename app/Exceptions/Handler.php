@@ -26,30 +26,30 @@ class Handler extends ExceptionHandler
     /**
      * Register the exception handling callbacks for the application.
      */
-    public function register(): void
-    {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
-
-        $this->renderable(function (NotFoundHttpException $err, $request) {
-            $message = basename($err->getMessage());
-            $nameModel = str_contains($message, ']') ? strstr($message, ']', true) : $message;
-            $model = preg_replace('/([a-z])([A-Z])/', '$1 $2', $nameModel);
-
-            return $this->error('Not Found.'." {$model}",401);
-        });
-
-        $this->renderable(function (QueryException $err, $request) {
-            if ($request->method() === 'DELETE')
-            {
-                return $this->error("Tidak Bisa Menghapus id ini di karenakan id sudah di gunakan di table lain");
-            }
-
-            return $this->error("Internal Server Error");
-        });
-
-    }
+//    public function register(): void
+//    {
+//        $this->reportable(function (Throwable $e) {
+//            //
+//        });
+//
+//        $this->renderable(function (NotFoundHttpException $err, $request) {
+//            $message = basename($err->getMessage());
+//            $nameModel = str_contains($message, ']') ? strstr($message, ']', true) : $message;
+//            $model = preg_replace('/([a-z])([A-Z])/', '$1 $2', $nameModel);
+//
+//            return $this->error('Not Found.'." {$model}",401);
+//        });
+//
+//        $this->renderable(function (QueryException $err, $request) {
+//            if ($request->method() === 'DELETE')
+//            {
+//                return $this->error("Tidak Bisa Menghapus id ini di karenakan id sudah di gunakan di table lain");
+//            }
+//
+//            return $this->error("Internal Server Error");
+//        });
+//
+//    }
 
     protected function unauthenticated($request, AuthenticationException $exception) {
         if ($request->expectsJson()) {

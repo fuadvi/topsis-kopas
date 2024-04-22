@@ -10,6 +10,7 @@ use App\Http\Controllers\QuestionTitleController;
 use App\Http\Controllers\ResultAnswerController;
 use App\Http\Controllers\SubCriteriaController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')
         Route::apiResource('questions', QuestionController::class);
 
         Route::post('answer', AnswerController::class);
+        Route::post('upload', UploadImageController::class);
 
         Route::controller(ResultAnswerController::class)
             ->group(function (){
