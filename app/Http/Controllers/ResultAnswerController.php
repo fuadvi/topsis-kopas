@@ -14,7 +14,7 @@ class ResultAnswerController extends Controller
 
     public function __construct()
     {
-        $this->middleware('admin')->except(['detail','index']);
+        $this->middleware('admin')->except(['detail','index','pieChart']);
     }
 
 
@@ -29,17 +29,14 @@ class ResultAnswerController extends Controller
 
     public function index(Request $request)
     {
-        $minat = Answer::whereUserId($request->user()->id)
-            ->whereQuestionName('Tes Minat')
-            ->get();
-
-        $bakat = Answer::whereUserId($request->user()->id)
-            ->whereQuestionName('Tes Bakat')
+        $result = Answer::whereUserId($request->user()->id)
+            ->groupBy('jurusan') // Mengelompokkan berdasarkan jurusan
+            ->selectRaw('jurusan, sum(score) as total_score') // Menjumlahkan skor untuk setiap jurusan
+            ->orderBy('total_score', 'desc') // Mengurutkan hasil berdasarkan total skor secara menurun
             ->get();
 
         return $this->success("detail jawaban keseluruhan", [
-            'minat' => $minat,
-            'bakat' => $bakat,
+            'result' => $result
         ]);
     }
 

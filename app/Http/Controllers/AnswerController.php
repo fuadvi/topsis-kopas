@@ -172,17 +172,14 @@ class AnswerController extends Controller
                 "score" => $scores[$index],
                 "type" => $metode,
                 "user_id" => $userId,
-                "question_name" => $questionName
+                "question_name" => $questionName,
+                "metode" => $metode
             ];
             Answer::create($data);
             $result[]= $data;
         }
 
-        Result::updateOrCreate(
-            [
-                'user_id' => $userId,
-                'metode' => $metode
-            ],
+        Result::create(
             $result[0]
         );
 
@@ -276,6 +273,7 @@ class AnswerController extends Controller
                 "jurusan_pnl_id" => $alternative->id,
                 "score" => $scores[$index],
                 "type" => $metode,
+                "metode" => $metode,
                 "user_id" => $userId,
                 "question_name" => $questionName,
             ];
@@ -284,11 +282,7 @@ class AnswerController extends Controller
             $result[] = $data;
         }
 
-        Result::updateOrCreate(
-            [
-                'user_id' => $userId,
-                'metode' => $metode
-            ],
+        Result::create(
             $result[0]
         );
 
