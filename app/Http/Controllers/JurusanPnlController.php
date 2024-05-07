@@ -16,7 +16,7 @@ class JurusanPnlController extends Controller
     use RespondFormatter;
     public function index(): JsonResponse
     {
-        $jurusanPNL = JurusanPnlResource::collection(JurusanPNL::with(['criteria.criteria.subcriteria'])->get());
+        $jurusanPNL = JurusanPnlResource::collection(JurusanPNL::with(['criteria.criteria.subcriteria','subject.subject'])->get());
 
         return $this->success('list data jurusan pnl', $jurusanPNL);
     }

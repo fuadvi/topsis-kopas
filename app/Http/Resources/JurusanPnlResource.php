@@ -19,6 +19,9 @@ class JurusanPnlResource extends JsonResource
             'name' => $this->name,
             'criteria' => $this->criteria->map(
                 fn($item) => BobotCriteriaResource::make($item->criteria)
+            ),
+            'subject' => $this->subject->map(
+                fn($item) => SubjectResource::make($item)
             )
         ];
     }
