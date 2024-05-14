@@ -183,6 +183,7 @@ class AnswerController extends Controller
             [
               'jurusan_pnl_id' => $result[0]['jurusan_pnl_id'],
               'user_id' => $result[0]['user_id'],
+              'metode' => $result[0]['metode'],
             ],
             $result[0]
         );
@@ -290,6 +291,7 @@ class AnswerController extends Controller
             [
                 'jurusan_pnl_id' => $result[0]['jurusan_pnl_id'],
                 'user_id' => $result[0]['user_id'],
+                'metode' => $result[0]['metode'],
             ],
             $result[0]
         );
