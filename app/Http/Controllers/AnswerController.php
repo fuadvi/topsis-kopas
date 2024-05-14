@@ -50,7 +50,7 @@ class AnswerController extends Controller
              "copras" => $this->metodeCOPRAS($listCeteria,$request->metode)
          };
 
-        return $this->success('successfully answered the question',collect($result)->sortBy('score',descending: true));
+        return $this->success('successfully answered the question',collect(array_values($result))->sortBy('score',descending: true));
     }
 
     public function metodeTopsis($listCeteria,$metode): array
@@ -179,7 +179,11 @@ class AnswerController extends Controller
             $result[]= $data;
         }
 
-        Result::create(
+        Result::updateOrCreate(
+            [
+              'jurusan_pnl_id' => $result[0]['jurusan_pnl_id'],
+              'user_id' => $result[0]['user_id'],
+            ],
             $result[0]
         );
 
@@ -282,7 +286,11 @@ class AnswerController extends Controller
             $result[] = $data;
         }
 
-        Result::create(
+        Result::updateOrCreate(
+            [
+                'jurusan_pnl_id' => $result[0]['jurusan_pnl_id'],
+                'user_id' => $result[0]['user_id'],
+            ],
             $result[0]
         );
 

@@ -21,7 +21,8 @@ class AuthController extends Controller
 
         return $this->success('login successfuly',(object)[
             "token" => $user->createToken('token')->plainTextToken,
-            "role" => $user->role->nama
+            "role" => $user->role->nama,
+            "user_id" => $user->id
         ]);
     }
 
