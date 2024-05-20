@@ -239,8 +239,16 @@ class AnswerController extends Controller
         foreach ($decisionMatrix as $rows) {
            $index = 0;
             $normalizedRow = array_map(static function ($x) use ($pembagi,&$index) {
+                if ($x->nilai == 0)
+                {
+                    $nilai = 0;
+                } else
+                {
+                    $nilai = $x->nilai / sqrt($pembagi[$index]);
+                }
+
                 $row = (object)[
-                    "nilai" =>($x->nilai / sqrt($pembagi[$index])) ?? 0,
+                    "nilai" =>$nilai,
                     "criteria_id" => $x->criteria_id,
                     "subject_id" => $x->subject_id
                 ];
