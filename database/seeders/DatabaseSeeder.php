@@ -22,16 +22,17 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
+            UserSeeder::class,
             JurusanSmkSeeder::class,
             JurusanPnlSeeder::class,
             CriteriaSeeder::class,
             CriteriaJurusanSeeder::class,
             QuestionTitleSeeder::class,
-            QuestionSeeder::class,
+//            QuestionSeeder::class,
             SubCriteriaSeeder::class,
             SubjectSeeder::class,
-            BobotCreteriaSeeder::class,
-            BobotSubjectSeeder::class
+//            BobotCreteriaSeeder::class,
+//            BobotSubjectSeeder::class
         ]);
     }
 }
