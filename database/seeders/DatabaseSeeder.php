@@ -22,9 +22,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
-            UserSeeder::class,
             JurusanSmkSeeder::class,
             JurusanPnlSeeder::class,
+            UserSeeder::class,
             CriteriaSeeder::class,
             CriteriaJurusanSeeder::class,
             QuestionTitleSeeder::class,
