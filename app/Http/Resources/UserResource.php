@@ -19,6 +19,8 @@ class UserResource extends JsonResource
             "nama" => $this->nama,
             "asal_sekolah" => $this->asal_sekolah,
             "jurusan" => $this->jurusan?->nama,
+            "nis" => $this->jurusan?->nis,
+            "kelas  " => $this->jurusan?->class,
             "minat" => UserDetailResource::collection($this->result),
         ];
     }
