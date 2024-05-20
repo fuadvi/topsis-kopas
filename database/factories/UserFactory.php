@@ -26,10 +26,10 @@ class UserFactory extends Factory
         return [
             'name' => 'admin',
             'email' => 'admin@gmail.com',
-            'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role_id' => 2
+            'role_id' => 2,
+            'jurusan_smk_id' => 1
         ];
     }
 
