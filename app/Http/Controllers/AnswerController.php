@@ -161,7 +161,7 @@ class AnswerController extends Controller
         // Hitung skor TOPSIS
         $scores = [];
         foreach ($positiveDistances as $key => $positiveDistance) {
-            $scores[] = $negativeDistances[$key] / ($positiveDistance + $negativeDistances[$key]);
+            $scores[] = ($negativeDistances[$key] / ($positiveDistance + $negativeDistances[$key])) ?? 0;
         }
 
         $result = [];
