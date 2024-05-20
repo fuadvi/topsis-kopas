@@ -23,7 +23,7 @@ class AuthController extends Controller
             "token" => $user->createToken('token')->plainTextToken,
             "role" => $user->role->nama,
             "user_id" => $user->id,
-            "user_name" => $user->name,
+            "user_name" => $user->nama,
         ]);
     }
 
