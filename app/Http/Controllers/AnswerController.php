@@ -50,7 +50,7 @@ class AnswerController extends Controller
              "copras" => $this->metodeCOPRAS($listCeteria,$request->metode)
          };
 
-        return $this->success('successfully answered the question',collect(array_values($result))->sortBy('score',descending: true));
+        return $this->success('successfully answered the question',collect(array_values($result))->sortBy('score',descending: true)->values());
     }
 
     public function metodeTopsis($listCeteria,$metode): array
@@ -331,7 +331,7 @@ class AnswerController extends Controller
 
         return BobotCriteria::whereCriteriaId($criteriaId)
             ->where('range','>=',$point)
-            ->value('point');
+            ->value('point')?? 0;
     }
 
 }
