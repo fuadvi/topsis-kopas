@@ -42,6 +42,10 @@ class JurusanPnlController extends Controller
 
     public function destroy(JurusanPNL $jurusan_pnl): JsonResponse
     {
+
+        $jurusan_pnl->criteria()->delete();
+        $jurusan_pnl->subject()->delete();
+        $jurusan_pnl->result()->delete();
         $jurusan_pnl->delete();
 
         return $this->success("berhasil menghapus jurusan", null);
@@ -51,6 +55,7 @@ class JurusanPnlController extends Controller
     {
         $jurusan_pnl->load('criteria');
 
+        $jurusan_pnl->criteria()->delete();
         $jurusan_pnl->criteria()->createMany($request->data);
 
         return $this->success("berhasil menambahkan criteria jurusan", null);
