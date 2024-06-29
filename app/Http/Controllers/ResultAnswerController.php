@@ -40,10 +40,11 @@ class ResultAnswerController extends Controller
         ]);
     }
 
-    public function pieChart()
+    public function pieChart(Request $request)
     {
-        $jurusan = JurusanPNL::withCount('result')
-            ->get();
+        $jurusan = JurusanPNL::withCount([
+            'result' =>  fn($query) => $query->whereMetode($request?->metode?? "topsis")
+        ]) ->get();
 
         return $this->success("list chart jurusan", [
             'jurusan' => $jurusan
