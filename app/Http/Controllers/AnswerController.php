@@ -7,6 +7,7 @@ use App\Http\Traits\RespondFormatter;
 use App\Models\Answer;
 use App\Models\BobotCriteria;
 use App\Models\JurusanPNL;
+use App\Models\Perhitungan;
 use App\Models\Question;
 use App\Models\Result;
 
@@ -69,12 +70,18 @@ class AnswerController extends Controller
             ->whereQuestionName($questionName)
             ?->delete();
 
+        Perhitungan::whereUserId($userId)
+            ->whereMetode($metode)
+            ?->delete();
+
         $alternatives  = JurusanPNL::with('criteria')->get();
 
         // Hitung matriks keputusan
         $decisionMatrix = [];
+        $dataAwal = [];
         foreach ($alternatives as $alternative) {
             $row = [];
+            $perhitungan = [];
             foreach ($listCeteria as $ceteria) {
                 $row["point"][] = (object)[
                     "nilai" =>  $ceteria['point'],
@@ -82,9 +89,23 @@ class AnswerController extends Controller
                     "subject_id" =>  $ceteria['subject_id'] ?? 0
                 ];
                 $row["jurusan_id"] = $alternative->id;
+                $row["jurusan_name"] = $alternative->name;
+
+                $perhitungan["point"][] = $ceteria['point'];
+                $perhitungan["jurusan"] = $alternative->name;
             }
             $decisionMatrix[] = $row;
+            $dataAwal[] = $perhitungan;
         }
+
+
+        Perhitungan::create([
+            'position' => 1,
+            'description' => 'Hitung matriks keputusan',
+            'calculation' => json_encode($dataAwal),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
 
         // Menghitung total dari setiap indeks
         $pembagi = array_reduce($decisionMatrix, static function ($carry, $item) {
@@ -94,8 +115,17 @@ class AnswerController extends Controller
             return $carry;
         }, array_fill(0, count($decisionMatrix[0]['point']), 0));
 
+        Perhitungan::create([
+            'position' => 2,
+            'description' => 'mendapatkan nilai pembagi setiap creteria',
+            'calculation' => json_encode($pembagi),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
         // Normalisasi matriks keputusan
         $normalizedMatrix = [];
+        $normalizedMatrixPerhitungan = [];
         foreach ($decisionMatrix as $row) {
             $index = 0;
             $normalizedRow = array_map(static function ($x) use ($pembagi,&$index) {
@@ -108,15 +138,25 @@ class AnswerController extends Controller
                 return $data;
             }, $row['point']);
 
+
             $data = [
                 "nilai" => $normalizedRow,
 //                "criteria_id" => $row['criteria_id'] ?? 0,
 //                "subject_id" => $row['subject_id'] ?? 0,
                 "jurusan_id" => $row['jurusan_id'],
+                "jurusan_name" => $row['jurusan_name'],
             ];
             $normalizedMatrix[] = $data;
-
+            $normalizedMatrixPerhitungan[] = collect($normalizedRow)->pluck('nilai');
         }
+
+        Perhitungan::create([
+            'position' => 3,
+            'description' => 'Normalisasi matriks keputusan',
+            'calculation' => json_encode($normalizedMatrixPerhitungan),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
 
         // Hitung matriks terbobot
         $weightedMatrix = [];
@@ -135,6 +175,14 @@ class AnswerController extends Controller
             $weightedMatrix[] = $weightedRow;
         }
 
+        Perhitungan::create([
+            'position' => 4,
+            'description' => 'hitung matriks terbobot',
+            'calculation' => json_encode($weightedMatrix),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
         // Hitung solusi ideal positif (PIS) dan solusi ideal negatif (NIS)
         $numCriteria = count($listCeteria);
         $pis = $nis = array_fill(0, $numCriteria, 0);
@@ -144,6 +192,22 @@ class AnswerController extends Controller
                 $nis[$key] = min($nis[$key], $value);
             }
         }
+
+        Perhitungan::create([
+            'position' => 5,
+            'description' => 'Hitung solusi ideal positif (PIS)',
+            'calculation' => json_encode($pis),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
+        Perhitungan::create([
+            'position' => 6,
+            'description' => 'Hitung  solusi ideal negatif (NIS)',
+            'calculation' => json_encode($nis),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
 
         // Hitung jarak dari setiap alternatif ke PIS dan NIS
         $positiveDistances = [];
@@ -158,6 +222,22 @@ class AnswerController extends Controller
             $negativeDistances[] = sqrt($negativeDistance);
         }
 
+        Perhitungan::create([
+            'position' => 7,
+            'description' => 'Hitung jarak dari setiap alternatif ke PIS',
+            'calculation' => json_encode($positiveDistances),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
+        Perhitungan::create([
+            'position' => 8,
+            'description' => 'Hitung jarak dari setiap alternatif ke NIS',
+            'calculation' => json_encode($negativeDistances),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
         // Hitung skor TOPSIS
         $scores = [];
         foreach ($positiveDistances as $key => $positiveDistance) {
@@ -170,7 +250,10 @@ class AnswerController extends Controller
             $scores[] = $nilai;
         }
 
+
+
         $result = [];
+        $resultPerhitungan = [];
         foreach ($alternatives as $index => $alternative) {
             $data = [
                 "jurusan" => $alternative->name,
@@ -183,7 +266,19 @@ class AnswerController extends Controller
             ];
             Answer::create($data);
             $result[]= $data;
+            $resultPerhitungan[]= [
+                "jurusan" => $alternative->name,
+                "score" => $scores[$index],
+            ];
         }
+
+        Perhitungan::create([
+            'position' => 9,
+            'description' => 'Hitung skor TOPSIS',
+            'calculation' => json_encode($resultPerhitungan),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
 
         Result::updateOrCreate(
             [
@@ -214,6 +309,19 @@ class AnswerController extends Controller
             ->whereQuestionName($questionName)
             ?->delete();
 
+
+        Perhitungan::whereUserId($userId)
+            ->whereMetode($metode)
+            ?->delete();
+
+        Perhitungan::create([
+            'position' => 1,
+            'description' => 'data hasil jawab soal',
+            'calculation' => json_encode($listCriteria),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
         $alternatives  = JurusanPNL::with('criteria')->get();
 
 
@@ -232,6 +340,14 @@ class AnswerController extends Controller
             $decisionMatrix[] = $row;
         }
 
+        Perhitungan::create([
+            'position' => 2,
+            'description' => 'Hitung matriks keputusan',
+            'calculation' => json_encode($decisionMatrix),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
         // Menghitung total dari setiap indeks
         $pembagi = array_reduce($decisionMatrix, static function ($carry, $item) {
             foreach ($item['bobot'] as $index => $value) {
@@ -239,6 +355,14 @@ class AnswerController extends Controller
             }
             return $carry;
         }, array_fill(0, count($decisionMatrix[0]['bobot']), 0));
+
+        Perhitungan::create([
+            'position' => 3,
+            'description' => 'mendapatkan nilai pembagi setiap creteria',
+            'calculation' => json_encode($pembagi),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
 
         // Normalisasi matriks keputusan
         $normalizedMatrix = [];
@@ -270,6 +394,14 @@ class AnswerController extends Controller
             $normalizedMatrix[] = $data;
         }
 
+        Perhitungan::create([
+            'position' => 4,
+            'description' => 'Normalisasi matriks keputusan',
+            'calculation' => json_encode($pembagi),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
+
         // Hitung skor COPRAS
         $scores = [];
         foreach ($normalizedMatrix as $row) {
@@ -300,6 +432,14 @@ class AnswerController extends Controller
             Answer::create($data);
             $result[] = $data;
         }
+
+        Perhitungan::create([
+            'position' => 5,
+            'description' => 'Hitung skor COPRAS',
+            'calculation' => json_encode($result),
+            'user_id' => $userId,
+            'metode' => $metode
+        ]);
 
         Result::updateOrCreate(
             [

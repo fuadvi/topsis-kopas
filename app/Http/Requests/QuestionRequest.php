@@ -25,6 +25,7 @@ class QuestionRequest extends FormRequest
     {
         return [
             'name' => ['required','string'],
+            'description' => ['nullable','string'],
             'question_title_id' => ['required','integer','exists:question_titles,id'],
             'criteria_id' => ['nullable','integer','exists:criterias,id'],
             'subject_id' => ['nullable','integer','exists:subjects,id'],
