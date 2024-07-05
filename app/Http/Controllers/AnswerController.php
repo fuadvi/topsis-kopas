@@ -130,7 +130,7 @@ class AnswerController extends Controller
             $index = 0;
             $normalizedRow = array_map(static function ($x) use ($pembagi,&$index) {
                 $data = (object)[
-                    "nilai" => $x->nilai / sqrt($pembagi[$index]),
+                    "nilai" => $x->nilai == 0 ? 0 : $x->nilai / sqrt($pembagi[$index]),
                     "criteria_id" => $x->criteria_id,
                     "subject_id" => $x->subject_id
                 ];
