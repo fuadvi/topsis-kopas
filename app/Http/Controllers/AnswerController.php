@@ -171,7 +171,6 @@ class AnswerController extends Controller
                     $value->subject_id,
                     );
             }
-
             $weightedMatrix[] = $weightedRow;
         }
 
@@ -258,7 +257,7 @@ class AnswerController extends Controller
             $data = [
                 "jurusan" => $alternative->name,
                 "jurusan_pnl_id" => $alternative->id,
-                "score" => $scores[$index],
+                "score" => $scores[$index] * 100,
                 "type" => $metode,
                 "user_id" => $userId,
                 "question_name" => $questionName,
@@ -482,6 +481,11 @@ class AnswerController extends Controller
         if ($jurusan->criteria->where('criteria_id',$criteriaId)->isEmpty()) {
             return 0;
         }
+
+        $maxRange =  BobotCriteria::whereCriteriaId($criteriaId)
+            ->max('point');
+
+        if ($point > $maxRange) $point = $maxRange;
 
         return BobotCriteria::whereCriteriaId($criteriaId)
             ->where('range','>=',$point)
