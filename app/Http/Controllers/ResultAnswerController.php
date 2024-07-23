@@ -6,6 +6,7 @@ use App\Http\Requests\DetailAnswerRequest;
 use App\Http\Traits\RespondFormatter;
 use App\Models\Answer;
 use App\Models\JurusanPNL;
+use App\Models\Result;
 use Illuminate\Http\Request;
 
 class ResultAnswerController extends Controller
@@ -35,6 +36,24 @@ class ResultAnswerController extends Controller
             ->orderBy('total_score', 'desc') // Mengurutkan hasil berdasarkan total skor secara menurun
             ->get();
 
+       $topRankData = collect($result)->first();
+
+       $jurusanId = JurusanPNL::whereName($topRankData->jurusan)->value('id');
+
+        Result::updateOrCreate(
+            [
+                'jurusan_pnl_id' => $jurusanId,
+                'user_id' => $request->user()->id,
+                'metode' => 'all',
+            ],
+           [
+               "jurusan" => $topRankData->jurusan,
+               'jurusan_pnl_id' => $jurusanId,
+               'user_id' => $request->user()->id,
+               'metode' => 'all',
+           ]
+        );
+
         return $this->success("detail jawaban keseluruhan", [
             'result' => $result
         ]);
@@ -43,7 +62,7 @@ class ResultAnswerController extends Controller
     public function pieChart(Request $request)
     {
         $jurusan = JurusanPNL::withCount([
-            'result' =>  fn($query) => $query->whereMetode($request?->metode?? "topsis")
+            'result' =>  fn($query) => $query->whereMetode($request?->metode?? "all")
         ]) ->get();
 
         return $this->success("list chart jurusan", [
