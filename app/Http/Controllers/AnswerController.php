@@ -410,12 +410,22 @@ class AnswerController extends Controller
             $scores[] = $score;
         }
 
+
+        $minSum = min($scores);
+        $maxSum = max($scores);
+
+        $utilityDegree = array_map(function ($score) use ($minSum, $maxSum) {
+            return ($score - $minSum) / ($maxSum - $minSum);
+        }, $scores);
+
+
         $result = [];
         foreach ($alternatives as $index => $alternative) {
             $data = [
                 "jurusan" => $alternative->name,
                 "jurusan_pnl_id" => $alternative->id,
-                "score" => $scores[$index],
+//                "score" => $scores[$index],
+                "score" => $utilityDegree[$index] * 100,
                 "type" => $metode,
                 "metode" => $metode,
                 "user_id" => $userId,
