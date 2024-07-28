@@ -20,7 +20,7 @@ class UserResource extends JsonResource
             "asal_sekolah" => $this->asal_sekolah,
             "jurusan" => $this->jurusan?->nama,
             "nis" => $this?->nis,
-            "kelas  " => $this?->class,
+            "kelas" => $this?->class,
             "minat" => UserDetailResource::collection($this->result),
         ];
     }
