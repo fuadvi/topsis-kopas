@@ -34,6 +34,7 @@ Route::controller(AuthController::class)
     });
 
 Route::get('jurusan-smk', JurusanSmkController::class);
+Route::get('perhitungan/{userId}/{position}',[UserController::class,'perhitungan']);
 Route::apiResource('users', UserController::class);
 
 Route::middleware('auth:sanctum')

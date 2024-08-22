@@ -95,9 +95,8 @@ class AnswerController extends Controller
                 $perhitungan["jurusan"] = $alternative->name;
             }
             $decisionMatrix[] = $row;
-            $dataAwal[] = $perhitungan;
+            $dataAwal[] = $perhitungan["point"];
         }
-
 
         Perhitungan::create([
             'position' => 1,
@@ -149,6 +148,8 @@ class AnswerController extends Controller
             $normalizedMatrix[] = $data;
             $normalizedMatrixPerhitungan[] = collect($normalizedRow)->pluck('nilai');
         }
+
+
 
         Perhitungan::create([
             'position' => 3,

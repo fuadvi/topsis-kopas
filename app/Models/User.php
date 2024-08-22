@@ -70,4 +70,10 @@ class User extends Authenticatable
         return $this->hasMany(Result::class)
             ->select('id','user_id','jurusan','metode');
     }
+
+    public function perhitungan()
+    {
+        return $this->hasMany(Perhitungan::class)
+                ->orderBy('position');
+    }
 }

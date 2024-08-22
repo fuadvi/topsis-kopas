@@ -14,6 +14,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $minat = UserDetailResource::collection($this->result);
         return [
             "id" => $this->id,
             "nama" => $this->nama,
@@ -21,7 +22,8 @@ class UserResource extends JsonResource
             "jurusan" => $this->jurusan?->nama,
             "nis" => $this?->nis,
             "kelas" => $this?->class,
-            "minat" => UserDetailResource::collection($this->result),
+            "minat" => $minat->take(1),
+//            "perhitungan" => $this->perhitungan
         ];
     }
 }
