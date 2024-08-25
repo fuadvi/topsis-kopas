@@ -15,7 +15,10 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::with(['result','jurusan'])
+        $user = User::with([
+            'result' => fn($query) => $query->whereNot('metode', 'copras')->orderByDesc('id'),
+            'jurusan'
+        ])
             ->findOrFail($id);
 
         return $this->success('detail user', new UserResource($user));
