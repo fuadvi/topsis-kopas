@@ -24,7 +24,7 @@ class UserController extends Controller
     public function index()
     {
         $user = User::with([
-            'result' => fn($query) => $query->where('metode', 'topsis')->orderByDesc('id'),
+            'result' => fn($query) => $query->whereNot('metode', 'copras')->orderByDesc('id'),
         ])->get();
 
         return $this->success('list user', UserResource::collection($user));
