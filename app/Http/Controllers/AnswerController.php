@@ -72,6 +72,7 @@ class AnswerController extends Controller
 
         Perhitungan::whereUserId($userId)
             ->whereMetode($metode)
+            ->whereQuestionName($questionName)
             ?->delete();
 
         $alternatives  = JurusanPNL::with('criteria')->get();
@@ -103,6 +104,7 @@ class AnswerController extends Controller
             'description' => 'Hitung matriks keputusan',
             'calculation' => json_encode($dataAwal),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -119,6 +121,7 @@ class AnswerController extends Controller
             'description' => 'mendapatkan nilai pembagi setiap creteria',
             'calculation' => json_encode($pembagi),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -156,6 +159,7 @@ class AnswerController extends Controller
             'description' => 'Normalisasi matriks keputusan',
             'calculation' => json_encode($normalizedMatrixPerhitungan),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -180,6 +184,7 @@ class AnswerController extends Controller
             'description' => 'hitung matriks terbobot',
             'calculation' => json_encode($weightedMatrix),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -198,6 +203,7 @@ class AnswerController extends Controller
             'description' => 'Hitung solusi ideal positif (PIS)',
             'calculation' => json_encode($pis),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -206,6 +212,7 @@ class AnswerController extends Controller
             'description' => 'Hitung  solusi ideal negatif (NIS)',
             'calculation' => json_encode($nis),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -227,6 +234,7 @@ class AnswerController extends Controller
             'description' => 'Hitung jarak dari setiap alternatif ke PIS',
             'calculation' => json_encode($positiveDistances),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -235,6 +243,7 @@ class AnswerController extends Controller
             'description' => 'Hitung jarak dari setiap alternatif ke NIS',
             'calculation' => json_encode($negativeDistances),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
@@ -277,6 +286,7 @@ class AnswerController extends Controller
             'description' => 'Hitung skor TOPSIS',
             'calculation' => json_encode($resultPerhitungan),
             'user_id' => $userId,
+            "question_name" => $questionName,
             'metode' => $metode
         ]);
 
