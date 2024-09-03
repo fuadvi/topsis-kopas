@@ -33,11 +33,13 @@ class UserController extends Controller
         return $this->success('list user', UserResource::collection($user));
     }
 
-    public function perhitungan($userId, $position)
+    public function perhitungan(Request $request, $userId, $position)
     {
         $perhitungan = Perhitungan::whereUserId($userId)
                                     ->wherePosition($position)
-                                    ->firstOrFail();
+                                    ->whereQuestionName($request->question_name)
+                                    ->first();
+
         return new PerhitunganRecource($perhitungan);
     }
 }

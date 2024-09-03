@@ -15,10 +15,10 @@ class PerhitunganRecource extends JsonResource
     public function toArray(Request $request) : array
     {
         return [
-            "position" => $this->position,
-            "description" => $this->description,
-            "calculation" => json_decode($this->calculation),
-            "metode" => $this->metode,
+            "position" => $this?->position ?? '',
+            "description" => $this?->description ?? '',
+            "calculation" =>  json_decode($this?->calculation?? '') ?? [],
+            "metode" => $this?->metode ?? '',
         ];
     }
 }
