@@ -33,7 +33,7 @@ class ResultAnswerController extends Controller
     {
         $result = Answer::whereUserId($request->user()->id)
             ->groupBy('jurusan') // Mengelompokkan berdasarkan jurusan
-            ->selectRaw('jurusan, sum(score) / 3 as total_score') // Menjumlahkan skor untuk setiap jurusan
+            ->selectRaw('jurusan, sum(score)/ 3 as total_score') // Menjumlahkan skor untuk setiap jurusan
             ->orderBy('total_score', 'desc') // Mengurutkan hasil berdasarkan total skor secara menurun
             ->get();
 

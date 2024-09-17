@@ -188,13 +188,16 @@ class AnswerController extends Controller
             'metode' => $metode
         ]);
 
+
+
         // Hitung solusi ideal positif (PIS) dan solusi ideal negatif (NIS)
+        $groupedData = array_map(null, ...array_column($weightedMatrix, null));
         $numCriteria = count($listCeteria);
         $pis = $nis = array_fill(0, $numCriteria, 0);
-        foreach ($weightedMatrix as $row) {
+        foreach ($weightedMatrix as  $row) {
             foreach ($row as $key => $value) {
-                $pis[$key] = max($pis[$key], $value);
-                $nis[$key] = min($nis[$key], $value);
+                $pis[$key] = max($groupedData[$key]);
+                $nis[$key] = min($groupedData[$key]);
             }
         }
 
